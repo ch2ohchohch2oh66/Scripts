@@ -6,6 +6,7 @@
 
 import logging
 import random
+from copy import deepcopy
 from heapq import merge
 
 '''
@@ -45,7 +46,8 @@ def quick_sort(l):
 步骤：
 将数组分割成两半，分别递归排序。
 合并两个已排序的子数组。
-重点在于：merge(*iterables, key=None, reverse=False)方法的输入是有序可迭代对象，比如[3,6,7],[1,5,9],则会合并输出一个有序的可迭代对象。
+重点在于：merge(*iterables, key=None, reverse=False)方法的输入是有序可迭代参数，比如[3,6,7],[1,5,9],则会合并输出一个有序的可迭代对象。
+关键思路：递归拆分给定的可迭代类型参数，直到拆分为len(l)==2的场景，则下一步merge(l1,l2)，从而实现最小单元的可迭代参数的有序合并，依次类推，返回更多有序参数的有序合并结果。
 '''
 def merge_sort(l):
     if not isinstance(l, list):
@@ -65,6 +67,23 @@ def merge_sort(l):
 从第二个元素开始，与前面的元素进行比较，找到合适的位置插入。
 重复该过程直到数组排序完成。
 '''
+def insert_sort(l):
+    if len(l) <= 1:
+        return l
+    result = l[0:1]
+    temp = l[1:]
+    for i in range(len(temp)):
+        for j in range(len(result)):
+            if temp[i] <= result[j]:
+                result.insert(j, temp[i])
+                break
+            elif j == len(result) - 1:
+                result.insert(j+1, temp[i])
+        print(result)
+    return result
+
+
+
 
 
 '''
@@ -93,7 +112,7 @@ def merge_sort(l):
 
 # 示例调用
 if __name__ == "__main__":
-    l = [3, 6, 8, 10, 1, 2, 1]
-    m = merge_sort(l)
-    print([i for i in m])
+    l = [9, 3, 6, 8, 10, 1, 2, 1]
+    sort_result = insert_sort(l)
+    print(sort_result)
 
