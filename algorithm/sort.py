@@ -6,6 +6,7 @@
 
 import logging
 import random
+from heapq import merge
 
 '''
 1. 排序算法
@@ -44,7 +45,17 @@ def quick_sort(l):
 步骤：
 将数组分割成两半，分别递归排序。
 合并两个已排序的子数组。
+重点在于：merge(*iterables, key=None, reverse=False)方法的输入是有序可迭代对象，比如[3,6,7],[1,5,9],则会合并输出一个有序的可迭代对象。
 '''
+def merge_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pls check')
+    if len(l) <= 1:
+        return l
+    m = len(l) // 2
+    left = merge_sort(l[:m])
+    right = merge_sort(l[m:])
+    return merge(left, right)
 
 
 '''
@@ -83,5 +94,6 @@ def quick_sort(l):
 # 示例调用
 if __name__ == "__main__":
     l = [3, 6, 8, 10, 1, 2, 1]
-    sorted_list = quick_sort(l)
-    print(sorted_list)
+    m = merge_sort(l)
+    print([i for i in m])
+
