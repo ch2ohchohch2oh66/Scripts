@@ -68,6 +68,8 @@ def merge_sort(l):
 重复该过程直到数组排序完成。
 '''
 def insert_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pls check')
     if len(l) <= 1:
         return l
     result = l[0:1]
@@ -83,16 +85,24 @@ def insert_sort(l):
     return result
 
 
-
-
-
 '''
 1.4 冒泡排序 (Bubble Sort)
 冒泡排序通过重复地交换相邻的元素，直到整个数组有序。它的时间复杂度为O(n²)，在性能上不如快速排序和归并排序，适合小数据量排序。
 步骤：
 从头到尾扫描一遍数组，将相邻元素比较并交换位置，使得大的元素逐渐“冒泡”到数组的尾部。
 对剩余的部分重复相同的过程，直到整个数组排序完成。
+关键思路：从第一个开始，和剩余部分依次比较，找出小的对调位置，最终会找出最小值到当前位置；依次类推，直到遍历完整个列表。
 '''
+def bubble_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pl check')
+    if len(l) <= 1:
+        return l
+    for i in range(len(l)-1):
+        for j in range(i+1, len(l)):
+            if l[i] > l[j]:
+                l[i], l[j] = l[j], l[i]
+    return l
 
 '''
 1.5 堆排序 (Heap Sort)
@@ -113,6 +123,6 @@ def insert_sort(l):
 # 示例调用
 if __name__ == "__main__":
     l = [9, 3, 6, 8, 10, 1, 2, 1]
-    sort_result = insert_sort(l)
+    sort_result = bubble_sort(l)
     print(sort_result)
 
