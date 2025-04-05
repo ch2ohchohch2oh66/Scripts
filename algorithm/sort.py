@@ -175,10 +175,26 @@ def selection_sort(l):
 创建一个计数数组，记录每个元素的出现次数。
 根据计数数组填充输出数组。
 '''
+def counting_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pls check')
 
+    if len(l) <= 1:
+        return l
+
+    max_value = max(l)
+    count = [0] * (max_value + 1)
+    for num in l:
+        count[num] += 1
+
+    result = []
+    for num, freq in enumerate(count):
+        result.extend([num] * freq)
+
+    return result
 # 示例调用
 if __name__ == "__main__":
-    l = [901, 3, 6, 88, 10, 1, 2, 500]
-    sort_result = selection_sort(l)
+    l = [901, 3, 2, 88, 10, 3, 2, 500]
+    sort_result = counting_sort(l)
     print(sort_result)
 
