@@ -111,6 +111,42 @@ def bubble_sort(l):
 构建最大堆。
 将堆顶元素与数组的最后一个元素交换，并且重新调整堆，重复这个过程直到排序完成。
 '''
+def heap_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pls check')
+    if len(l) <= 1:
+        return l
+    def _heap_sort(arr, root_index):
+        length = len(arr)
+        if root_index > length // 2 - 1:
+            return
+        largest_memmber_index = root_index
+        left_index = root_index * 2 + 1
+        right_index = root_index * 2 + 2
+
+        if left_index < length and arr[left_index] > arr[largest_memmber_index]:
+            largest_memmber_index = left_index
+        if right_index < length and arr[right_index] > arr[largest_memmber_index]:
+            largest_memmber_index = right_index
+
+        if largest_memmber_index != root_index:
+            arr[root_index], arr[largest_memmber_index] = arr[largest_memmber_index], arr[root_index]
+            _heap_sort(arr, largest_memmber_index)
+
+    def create_max_heap(arr):
+        for i in range(len(arr) // 2 -1, -1, -1):
+            _heap_sort(arr, i)
+
+    create_max_heap(l)
+    result = []
+    for j in range(len(l)):
+        result.append(l.pop(0))
+        if l:
+            create_max_heap(l)
+    return result
+
+
+
 
 '''
 1.7 计数排序 (Counting Sort)
@@ -122,7 +158,7 @@ def bubble_sort(l):
 
 # 示例调用
 if __name__ == "__main__":
-    l = [9, 3, 6, 8, 10, 1, 2, 1]
-    sort_result = bubble_sort(l)
+    l = [91, 3, 6, 88, 10, 1, 2, 500]
+    sort_result = heap_sort(l)
     print(sort_result)
 
