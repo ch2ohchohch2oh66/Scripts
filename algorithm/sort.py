@@ -116,7 +116,7 @@ def heap_sort(l):
         raise TypeError('Error Type, pls check')
     if len(l) <= 1:
         return l
-    def _heap_sort(arr, root_index):
+    def _heapify(arr, root_index, heap_type = 'max'):
         length = len(arr)
         if root_index > length // 2 - 1:
             return
@@ -124,29 +124,50 @@ def heap_sort(l):
         left_index = root_index * 2 + 1
         right_index = root_index * 2 + 2
 
-        if left_index < length and arr[left_index] > arr[largest_memmber_index]:
-            largest_memmber_index = left_index
-        if right_index < length and arr[right_index] > arr[largest_memmber_index]:
-            largest_memmber_index = right_index
+        if left_index < length:
+            if (heap_type == 'mix' and arr[left_index] < arr[largest_memmber_index]) or (heap_type == 'max' and arr[left_index] > arr[largest_memmber_index]):
+                largest_memmber_index = left_index
+        if right_index < length:
+            if (heap_type == 'mix' and arr[right_index] < arr[largest_memmber_index]) or (heap_type == 'max' and arr[right_index] > arr[largest_memmber_index]):
+                largest_memmber_index = right_index
 
         if largest_memmber_index != root_index:
             arr[root_index], arr[largest_memmber_index] = arr[largest_memmber_index], arr[root_index]
-            _heap_sort(arr, largest_memmber_index)
+            _heapify(arr, largest_memmber_index)
 
-    def create_max_heap(arr):
+    def _build_heap(arr):
         for i in range(len(arr) // 2 -1, -1, -1):
-            _heap_sort(arr, i)
+            _heapify(arr, i, 'mix')
 
-    create_max_heap(l)
+    _build_heap(l)
     result = []
     for j in range(len(l)):
         result.append(l.pop(0))
         if l:
-            create_max_heap(l)
+            _build_heap(l)
     return result
 
 
+'''
+1.6 选择排序 (Selection Sort)
+选择排序每次从未排序部分中找到最小（或最大）元素，将其放到已排序部分的末尾。时间复杂度为O(n²)，适合小数据量排序。
+步骤：
+1. 从未排序部分中找到最小的元素，并交换到已排序部分的末尾。
+2. 重复该过程直到数组排序完成。
+'''
+def selection_sort(l):
+    if not isinstance(l, list):
+        raise TypeError('Error Type, pls check')
 
+    if len(l) <= 1:
+        return l
+
+    for i in range(len(l) - 1):
+        for j in range(i + 1, len(l)):
+            if l[i] > l[j]:
+                l[i], l[j] = l[j], l[i]
+
+    return l
 
 '''
 1.7 计数排序 (Counting Sort)
