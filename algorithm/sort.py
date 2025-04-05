@@ -91,17 +91,16 @@ def insert_sort(l):
 步骤：
 从头到尾扫描一遍数组，将相邻元素比较并交换位置，使得大的元素逐渐“冒泡”到数组的尾部。
 对剩余的部分重复相同的过程，直到整个数组排序完成。
-关键思路：从第一个开始，和剩余部分依次比较，找出小的对调位置，最终会找出最小值到当前位置；依次类推，直到遍历完整个列表。
 '''
 def bubble_sort(l):
     if not isinstance(l, list):
         raise TypeError('Error Type, pl check')
     if len(l) <= 1:
         return l
-    for i in range(len(l)-1):
-        for j in range(i+1, len(l)):
-            if l[i] > l[j]:
-                l[i], l[j] = l[j], l[i]
+    for j in range(len(l) - 1):
+        for i in range(len(l) -j - 1):
+            if l[i] > l[i+1]:
+                l[i], l[i+1] = l[i+1], l[i]
     return l
 
 '''
@@ -179,7 +178,7 @@ def selection_sort(l):
 
 # 示例调用
 if __name__ == "__main__":
-    l = [91, 3, 6, 88, 10, 1, 2, 500]
-    sort_result = heap_sort(l)
+    l = [901, 3, 6, 88, 10, 1, 2, 500]
+    sort_result = selection_sort(l)
     print(sort_result)
 
