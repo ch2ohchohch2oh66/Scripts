@@ -33,6 +33,24 @@
   - 否 -> 返回 -1 -> 结束
 
 '''
+def binary_search(arr, target):
+    if not arr or not target or not isinstance(arr, list):
+        raise TypeError('Error Type, pls check')
+    
+    start_index = 0
+    end_index = len(arr)-1
+    
+    while start_index <= end_index:
+        mid_index = (start_index + end_index) // 2
+        if arr[mid_index] == target:
+            return mid_index
+        elif arr[mid_index] > target:
+            end_index = mid_index - 1
+        else:
+            start_index = mid_index + 1
+    return -1
+
+    
 
 
 '''
@@ -159,4 +177,10 @@
 - 结束
 
 '''
+
+if __name__ == '__main__':
+    l = [3,4,5,6,7]
+    target = 7
+    result = binary_search(l, target)
+    print(result)
 
