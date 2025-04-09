@@ -50,9 +50,6 @@ def binary_search(arr, target):
             start_index = mid_index + 1
     return -1
 
-    
-
-
 '''
 2.2 深度优先搜索 (DFS)
 
@@ -75,6 +72,25 @@ def binary_search(arr, target):
 - 结束：当所有节点都被访问过时。
 
 '''
+def deep_first_search(graph, start_node):
+    direction = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+    row = len(graph)
+    col = len(graph[0])
+    visited = [[0 for _ in range(col)] for _ in range(row)]
+    count = 0
+    def _dfs(node):
+        nonlocal count
+        count += 1
+        x, y = node
+        visited[x][y] = 1
+        print(f'{count} : {node} : {graph[x][y]}')
+        for dx, dy in direction:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < row and 0 <= ny < col and visited[nx][ny] == 0:
+                newo_node = (nx, ny)
+                _dfs(newo_node)
+
+    _dfs(start_node)
 
 
 '''
@@ -179,8 +195,17 @@ def binary_search(arr, target):
 '''
 
 if __name__ == '__main__':
-    l = [3,4,5,6,7]
-    target = 7
-    result = binary_search(l, target)
-    print(result)
+    # l = [3,4,5,6,7]
+    # target = 7
+    # result = binary_search(l, target)
+    # print(result)
+
+    graph = [[0, 1, 2, 3, 4],
+          [10, 11, 12, 13, 14],
+          [20, 21, 22, 23, 24],
+          [30, 31, 32, 33, 34],
+          [40, 41, 42, 43, 44],
+          [50, 51, 52, 53, 54],
+          [60, 61, 62, 63, 64]]
+    deep_first_search(graph, (3, 2))
 
