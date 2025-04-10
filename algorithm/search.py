@@ -31,7 +31,6 @@
       - 是 -> 更新 `low = mid + 1` -> 继续循环
       - 否 -> 更新 `high = mid - 1` -> 继续循环
   - 否 -> 返回 -1 -> 结束
-
 '''
 def binary_search(arr, target):
     if not arr or not target or not isinstance(arr, list):
@@ -70,7 +69,6 @@ def binary_search(arr, target):
   - 未访问 -> 递归调用DFS
   - 已访问 -> 跳过
 - 结束：当所有节点都被访问过时。
-
 '''
 def deep_first_search(graph, start_node):
     direction = [(0, -1), (0, 1), (-1, 0), (1, 0)]
@@ -87,14 +85,45 @@ def deep_first_search(graph, start_node):
         for dx, dy in direction:
             nx, ny = x + dx, y + dy
             if 0 <= nx < row and 0 <= ny < col and visited[nx][ny] == 0:
-                newo_node = (nx, ny)
-                _dfs(newo_node)
+                new_node = (nx, ny)
+                _dfs(new_node)
 
     _dfs(start_node)
 
-
 '''
+问题描述： 给定一个二维迷宫，其中 0 表示可以通过的路径，1 表示障碍物或墙壁。
+起点为 (0, 0)，终点为 (m-1, n-1)，要求找到从起点到终点的一条路径。
+'''
+def dfs_maze(maze, start, end):
+    if not maze or not start or not end:
+        raise ValueError('Invalid Input, pls check')
+    if not isinstance(maze, list) or not isinstance(maze[0], list) or not isinstance(start, tuple) or not isinstance(end, tuple):
+        raise TypeError('Invalid, pls check')
+    derection = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+    row, col = len(maze), len(maze[0])
+    visited = [[0 for _ in range(col)] for _ in range(row)]
+    path = []
+    def _dfs_maze(node):
+        x, y = node
+        if visited[x][y] == 1:
+            return False
+        if maze[x][y] == 1:
+            path.pop()
+            return False
+        if maze[x][y] == 0:
+            visited[x][y] = 1
+            path.append((x, y))
+            if node == end:
+                return True
+            for dx, dy in derection:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < row and 0 <= ny < col and not visited[dx][dy]:
+                    new_node = (nx, ny)
+                    _dfs_maze(new_node)
 
+        return path
+    return _dfs_maze(start)
+'''
 2.3 广度优先搜索 (BFS)
 
 题目描述：
@@ -200,12 +229,22 @@ if __name__ == '__main__':
     # result = binary_search(l, target)
     # print(result)
 
-    graph = [[0, 1, 2, 3, 4],
-          [10, 11, 12, 13, 14],
-          [20, 21, 22, 23, 24],
-          [30, 31, 32, 33, 34],
-          [40, 41, 42, 43, 44],
-          [50, 51, 52, 53, 54],
-          [60, 61, 62, 63, 64]]
-    deep_first_search(graph, (3, 2))
+    # graph = [[0, 1, 2, 3, 4],
+    #       [10, 11, 12, 13, 14],
+    #       [20, 21, 22, 23, 24],
+    #       [30, 31, 32, 33, 34],
+    #       [40, 41, 42, 43, 44],
+    #       [50, 51, 52, 53, 54],
+    #       [60, 61, 62, 63, 64]]
+    # deep_first_search(graph, (3, 2))
 
+    maze = [
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0]
+    ]
+    start = (0, 0)
+    end = (4, 4)
+    print(dfs_maze(maze, start, end))
