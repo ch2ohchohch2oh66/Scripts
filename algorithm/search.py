@@ -97,31 +97,35 @@ def deep_first_search(graph, start_node):
 def dfs_maze(maze, start, end):
     if not maze or not start or not end:
         raise ValueError('Invalid Input, pls check')
-    if not isinstance(maze, list) or not isinstance(maze[0], list) or not isinstance(start, tuple) or not isinstance(end, tuple):
+    if not isinstance(maze, list) or not isinstance(maze[0], list) or not isinstance(start, tuple) or not isinstance(
+            end, tuple):
         raise TypeError('Invalid, pls check')
-    derection = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+    if maze[start[0]][start[1]] == 1 or maze[end[0]][end[1]] == 1:
+        return []  # 起点或终点为障碍物，直接返回空路径
+
+    direction = [(1, 0), (-1, 0), (0, -1), (0, 1)]
     row, col = len(maze), len(maze[0])
     visited = [[0 for _ in range(col)] for _ in range(row)]
     path = []
+
     def _dfs_maze(node):
         x, y = node
-        if visited[x][y] == 1:
-            return False
-        if maze[x][y] == 1:
-            path.pop()
-            return False
-        if maze[x][y] == 0:
-            visited[x][y] = 1
-            path.append((x, y))
-            if node == end:
-                return True
-            for dx, dy in derection:
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < row and 0 <= ny < col and not visited[dx][dy]:
-                    new_node = (nx, ny)
-                    _dfs_maze(new_node)
+        if visited[x][y] == 1 or maze[x][y] == 1:
+            return []
+        visited[x][y] = 1
+        path.append((x, y))
+        if node == end:
+            return path
+        for dx, dy in direction:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < row and 0 <= ny < col and not visited[nx][ny]:
+                new_node = (nx, ny)
+                result = _dfs_maze(new_node)
+                if result:  # 如果找到路径，直接返回
+                    return result
+        path.pop()  # 回溯，如果没有找到路径，则将当前节点从路径中移除
+        return []
 
-        return path
     return _dfs_maze(start)
 '''
 2.3 广度优先搜索 (BFS)
@@ -243,7 +247,7 @@ if __name__ == '__main__':
         [0, 1, 0, 1, 0],
         [0, 0, 0, 1, 0],
         [0, 1, 1, 1, 0],
-        [0, 0, 0, 0, 0]
+        [0, 0, 1, 0, 0]
     ]
     start = (0, 0)
     end = (4, 4)
