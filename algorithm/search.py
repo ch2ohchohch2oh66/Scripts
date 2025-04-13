@@ -95,38 +95,60 @@ def deep_first_search(graph, start_node):
 起点为 (0, 0)，终点为 (m-1, n-1)，要求找到从起点到终点的一条路径。
 '''
 def dfs_maze(maze, start, end):
+    """
+    使用深度优先搜索寻找迷宫中从起点到终点的路径
+    
+    Args:
+        maze (List[List[int]]): 二维迷宫,0表示通路,1表示墙
+        start (tuple): 起点坐标 (x,y)
+        end (tuple): 终点坐标 (x,y)
+    
+    Returns:
+        List[tuple]: 从起点到终点的路径,如果不存在则返回空列表
+    """
+    # 输入验证
     if not maze or not start or not end:
-        raise ValueError('Invalid Input, pls check')
-    if not isinstance(maze, list) or not isinstance(maze[0], list) or not isinstance(start, tuple) or not isinstance(
-            end, tuple):
-        raise TypeError('Invalid, pls check')
-    if maze[start[0]][start[1]] == 1 or maze[end[0]][end[1]] == 1:
-        return []  # 起点或终点为障碍物，直接返回空路径
-
-    direction = [(1, 0), (-1, 0), (0, -1), (0, 1)]
+        raise ValueError('迷宫、起点或终点不能为空')
+    if not isinstance(maze, list) or not isinstance(maze[0], list):
+        raise TypeError('迷宫必须是二维列表')
+    if not isinstance(start, tuple) or not isinstance(end, tuple):
+        raise TypeError('起点和终点必须是元组类型')
+        
+    # 检查起点和终点是否有效
     row, col = len(maze), len(maze[0])
-    visited = [[0 for _ in range(col)] for _ in range(row)]
-    path = []
-
-    def _dfs_maze(node):
-        x, y = node
-        if visited[x][y] == 1 or maze[x][y] == 1:
-            return []
-        visited[x][y] = 1
-        path.append((x, y))
-        if node == end:
-            return path
-        for dx, dy in direction:
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < row and 0 <= ny < col and not visited[nx][ny]:
-                new_node = (nx, ny)
-                result = _dfs_maze(new_node)
-                if result:  # 如果找到路径，直接返回
-                    return result
-        path.pop()  # 回溯，如果没有找到路径，则将当前节点从路径中移除
+    if not (0 <= start[0] < row and 0 <= start[1] < col and
+            0 <= end[0] < row and 0 <= end[1] < col):
+        raise ValueError('起点或终点超出迷宫范围')
+    if maze[start[0]][start[1]] == 1 or maze[end[0]][end[1]] == 1:
         return []
 
-    return _dfs_maze(start)
+    # 初始化
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 右下左上,顺时针方向
+    visited = set()
+    path = []
+    
+    def is_valid(x, y):
+        """检查坐标是否有效且可通行"""
+        return (0 <= x < row and 0 <= y < col and 
+                maze[x][y] == 0 and (x, y) not in visited)
+
+    def _dfs(current):
+        if current == end:
+            return True
+            
+        visited.add(current)
+        path.append(current)
+        
+        for dx, dy in directions:
+            next_x, next_y = current[0] + dx, current[1] + dy
+            if is_valid(next_x, next_y):
+                if _dfs((next_x, next_y)):
+                    return True
+                    
+        path.pop()
+        return False
+
+    return path if _dfs(start) else []
 '''
 2.3 广度优先搜索 (BFS)
 
