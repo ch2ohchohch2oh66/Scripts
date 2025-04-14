@@ -124,31 +124,45 @@ def dfs_maze(maze, start, end):
 
     # 初始化
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 右下左上,顺时针方向
-    visited = set()
-    path = []
+    visited = set([start])  # 将起点标记为已访问
+    path = [start]  # 路径以起点开始
     
-    def is_valid(x, y):
-        """检查坐标是否有效且可通行"""
-        return (0 <= x < row and 0 <= y < col and 
-                maze[x][y] == 0 and (x, y) not in visited)
-
-    def _dfs(current):
-        if current == end:
+    def backtrack():
+        # 如果已经到达终点，返回True
+        if path[-1] == end:
             return True
             
-        visited.add(current)
-        path.append(current)
+        # 获取当前位置
+        x, y = path[-1]
         
+        # 尝试四个方向
         for dx, dy in directions:
-            next_x, next_y = current[0] + dx, current[1] + dy
-            if is_valid(next_x, next_y):
-                if _dfs((next_x, next_y)):
+            next_x, next_y = x + dx, y + dy
+            next_pos = (next_x, next_y)
+            
+            # 检查下一个位置是否有效
+            if (0 <= next_x < row and 0 <= next_y < col and
+                maze[next_x][next_y] == 0 and next_pos not in visited):
+                # 将下一个位置添加到路径中并标记为已访问
+                path.append(next_pos)
+                visited.add(next_pos)
+                
+                # 递归尝试从下一个位置继续搜索
+                if backtrack():
                     return True
-                    
-        path.pop()
+                
+                # 如果无法从下一个位置到达终点，则回溯
+                path.pop()
+                # 注意：不从visited中移除，因为这个路径已经尝试过了
+        
         return False
+    
+    # 开始回溯搜索
+    if backtrack():
+        return path  # 找到路径
+    else:
+        return []  # 没有找到路径
 
-    return path if _dfs(start) else []
 '''
 2.3 广度优先搜索 (BFS)
 
