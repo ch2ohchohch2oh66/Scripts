@@ -32,13 +32,15 @@
       - 否 -> 更新 `high = mid - 1` -> 继续循环
   - 否 -> 返回 -1 -> 结束
 '''
+
+
 def binary_search(arr, target):
     if not arr or not target or not isinstance(arr, list):
         raise TypeError('Error Type, pls check')
-    
+
     start_index = 0
-    end_index = len(arr)-1
-    
+    end_index = len(arr) - 1
+
     while start_index <= end_index:
         mid_index = (start_index + end_index) // 2
         if arr[mid_index] == target:
@@ -48,6 +50,7 @@ def binary_search(arr, target):
         else:
             start_index = mid_index + 1
     return -1
+
 
 '''
 2.2 深度优先搜索 (DFS)
@@ -70,12 +73,15 @@ def binary_search(arr, target):
   - 已访问 -> 跳过
 - 结束：当所有节点都被访问过时。
 '''
+
+
 def deep_first_search(graph, start_node):
     direction = [(0, -1), (0, 1), (-1, 0), (1, 0)]
     row = len(graph)
     col = len(graph[0])
     visited = [[0 for _ in range(col)] for _ in range(row)]
     count = 0
+
     def _dfs(node):
         nonlocal count
         count += 1
@@ -90,10 +96,13 @@ def deep_first_search(graph, start_node):
 
     _dfs(start_node)
 
+
 '''
 问题描述： 给定一个二维迷宫，其中 0 表示可以通过的路径，1 表示障碍物或墙壁。
 起点为 (0, 0)，终点为 (m-1, n-1)，要求找到从起点到终点的一条路径。
 '''
+
+
 def dfs_maze(maze, start, end):
     """
     使用深度优先搜索寻找迷宫中从起点到终点的路径
@@ -113,7 +122,7 @@ def dfs_maze(maze, start, end):
         raise TypeError('迷宫必须是二维列表')
     if not isinstance(start, tuple) or not isinstance(end, tuple):
         raise TypeError('起点和终点必须是元组类型')
-        
+
     # 检查起点和终点是否有效
     row, col = len(maze), len(maze[0])
     if not (0 <= start[0] < row and 0 <= start[1] < col and
@@ -126,42 +135,43 @@ def dfs_maze(maze, start, end):
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 右下左上,顺时针方向
     visited = set([start])  # 将起点标记为已访问
     path = [start]  # 路径以起点开始
-    
+
     def backtrack():
         # 如果已经到达终点，返回True
         if path[-1] == end:
             return True
-            
+
         # 获取当前位置
         x, y = path[-1]
-        
+
         # 尝试四个方向
         for dx, dy in directions:
             next_x, next_y = x + dx, y + dy
             next_pos = (next_x, next_y)
-            
+
             # 检查下一个位置是否有效
             if (0 <= next_x < row and 0 <= next_y < col and
-                maze[next_x][next_y] == 0 and next_pos not in visited):
+                    maze[next_x][next_y] == 0 and next_pos not in visited):
                 # 将下一个位置添加到路径中并标记为已访问
                 path.append(next_pos)
                 visited.add(next_pos)
-                
+
                 # 递归尝试从下一个位置继续搜索
                 if backtrack():
                     return True
-                
+
                 # 如果无法从下一个位置到达终点，则回溯
                 path.pop()
                 # 注意：不从visited中移除，因为这个路径已经尝试过了
-        
+
         return False
-    
+
     # 开始回溯搜索
     if backtrack():
         return path  # 找到路径
     else:
         return []  # 没有找到路径
+
 
 '''
 2.3 广度优先搜索 (BFS)
@@ -186,7 +196,6 @@ def dfs_maze(maze, start, end):
   - 否 -> 结束
 
 '''
-
 
 '''
 
@@ -213,6 +222,23 @@ def dfs_maze(maze, start, end):
 '''
 
 
+def find_max_min(arr):
+    if not isinstance(arr, list):
+        return TypeError("Error Type, pls check")
+
+    if not arr:
+        return ValueError("Error Value, pls check")
+
+    max, min = arr[0], arr[0]
+    for i in arr:
+        if i > max:
+            max = i;
+        if i < min:
+            min = i;
+
+    return max, min
+
+
 '''
 
 2.5 查找缺失的数字 (例如：1到N的数组中缺失一个数字)
@@ -235,7 +261,6 @@ def dfs_maze(maze, start, end):
 - 计算差值 -> 返回差值
 
 '''
-
 
 '''
 
@@ -264,10 +289,13 @@ def dfs_maze(maze, start, end):
 '''
 
 if __name__ == '__main__':
-    # l = [3,4,5,6,7]
+    l = [3, 4, 5, 6, 7, 9, 8, 1, 2]
     # target = 7
     # result = binary_search(l, target)
     # print(result)
+
+    max, min = find_max_min(l)
+    print(f"max: {max}, min: {min}")
 
     # graph = [[0, 1, 2, 3, 4],
     #       [10, 11, 12, 13, 14],
@@ -278,13 +306,13 @@ if __name__ == '__main__':
     #       [60, 61, 62, 63, 64]]
     # deep_first_search(graph, (3, 2))
 
-    maze = [
-        [0, 1, 0, 0, 0],
-        [0, 1, 0, 1, 0],
-        [0, 0, 0, 1, 0],
-        [0, 1, 1, 1, 0],
-        [0, 0, 1, 0, 0]
-    ]
-    start = (0, 0)
-    end = (4, 4)
-    print(dfs_maze(maze, start, end))
+    # maze = [
+    #     [0, 1, 0, 0, 0],
+    #     [0, 1, 0, 1, 0],
+    #     [0, 0, 0, 1, 0],
+    #     [0, 1, 1, 1, 0],
+    #     [0, 0, 1, 0, 0]
+    # ]
+    # start = (0, 0)
+    # end = (4, 4)
+    # print(dfs_maze(maze, start, end))
