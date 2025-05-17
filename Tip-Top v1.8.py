@@ -33,8 +33,10 @@ def extract_top_data(pid_list, command_list):
     # 打开txt文件并逐行读取数据
     with open(top_file_path, 'r') as file:
         # 初始化字典，用于存储CPU和MEM信息
-        cpu_data = {'time': [], 'us': [], 'sy': [], 'ni': [], 'id': [], 'wa': [], 'hi': [], 'si': [], 'st': [], 'used': []}
-        mem_data = {'time': [], 'total': [], 'free': [], 'used': [], 'buff/cache': [], 'nonfree rate': [], 'used rate': []}
+        cpu_data = {'time': [], 'us': [], 'sy': [], 'ni': [], 'id': [], 'wa': [], 'hi': [], 'si': [], 'st': [],
+                    'used': []}
+        mem_data = {'time': [], 'total': [], 'free': [], 'used': [], 'buff/cache': [], 'buffers': [], 'cached': [],
+                    'real_used_rate': []}
         free_index = 1
         used_index = 2
         isInit = True
@@ -92,37 +94,47 @@ def extract_top_data(pid_list, command_list):
                 cpu_data['st'].append(cpu_data_num[7])
                 cpu_data['used'].append(used)
 
-            elif line.startswith('MiB Mem') or line.startswith('KiB Mem') or line.startswith('Mem'):
+            elif line.startswith('MiB Mem') or line.startswith('KiB Mem'):
+                # 第一种格式：buff/cache
                 logger.debug(f'开始处理MEM信息：{line.strip()}')
-                # 处理mem数据：兼容整数和小数两种情况
-                mem_data_str = re.findall(r'\b\d+(?:\.\d+)?\b', line) or re.findall(r'\d+', line)
+                mem_data_str = re.findall(r'\b\d+(?:\.\d+)?\b', line)
                 mem_data_num = [float(num) for num in mem_data_str]
                 logger.debug(f'MEM信息匹配结果：{mem_data_num}')
-
-                # 确定free和used的索引
-                if isInit:
-                    original_free_index = line.index('free')
-                    original_used_index = line.index('used')
-                    if original_free_index > original_used_index:
-                        logger.info('更新free/used位置')
-                        free_index = 2
-                        used_index = 1
-
-                    isInit = False
-                free = mem_data_num[free_index]
-                used = mem_data_num[used_index]
-                total = mem_data_num[0]
-                buff_cache = mem_data_num[3]
-
-                # 计算MEM使用率，nonfree rate：(total-free)/total
-                nonfree_rate = (total - free) * 100 / total
-                mem_data['time'].append(current_time)  # 使用提取的时间
+                total, free, used, buff_cache = mem_data_num[:4]
+                real_used = used - buff_cache
+                real_used_rate = round(real_used * 100 / total, 2)
+                mem_data['time'].append(current_time)
                 mem_data['total'].append(total)
                 mem_data['free'].append(free)
                 mem_data['used'].append(used)
                 mem_data['buff/cache'].append(buff_cache)
-                mem_data['nonfree rate'].append(round(nonfree_rate, 1))
-                mem_data['used rate'].append(round(used * 100 / total, 1))
+                mem_data['buffers'].append(0)  # 第一种格式无buffers
+                mem_data['cached'].append(0)  # 第一种格式无cached
+                mem_data['real_used_rate'].append(real_used_rate)
+            elif line.startswith('Mem:'):
+                logger.debug(f'开始处理MEM信息：{line.strip()}')
+                # 允许单位k/M/G
+                mem_data_str = re.findall(r'(\d+(?:\.\d+)?)([kMG]?)', line)
+                if len(mem_data_str) < 4:
+                    logger.warning(f'内存行无法解析，内容为: {line.strip()}，提取结果: {mem_data_str}')
+                    continue
+                # 去掉单位，仅取数值
+                mem_data_num = [float(num) for num, unit in mem_data_str]
+                total, used, free, buffers = mem_data_num[:4]
+                # 读取下一行Swap，提取cached
+                next_line = next(file)
+                cached_match = re.search(r'(\d+(?:\.\d+)?)k cached', next_line)
+                cached = float(cached_match.group(1)) if cached_match else 0
+                real_used = used - buffers - cached
+                real_used_rate = round(real_used * 100 / total, 2)
+                mem_data['time'].append(current_time)
+                mem_data['total'].append(total)
+                mem_data['free'].append(free)
+                mem_data['used'].append(used)
+                mem_data['buff/cache'].append(0)  # 第二种格式无buff/cache
+                mem_data['buffers'].append(buffers)
+                mem_data['cached'].append(cached)
+                mem_data['real_used_rate'].append(real_used_rate)
             elif process_list:
                 # 匹配PID\CUP\MEM\TIME\COMMAND
                 # match = re.search(rf'(\d+)\s+.*?(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+:\d+\.\d+)\s+(.+?)\n', line)
@@ -248,7 +260,7 @@ def extract_sar_data():
         avg_txMb = calculate_average(txMb_data, startIndex, endIndex)
 
         # 将平均值插入到数据顶部
-        bw_data['rxkB/s'].insert(0, avg_rxkB)  
+        bw_data['rxkB/s'].insert(0, avg_rxkB)
         bw_data['txkB/s'].insert(0, avg_txkB)
         bw_data['rxMb/s'].insert(0, avg_rxMb)
         bw_data['txMb/s'].insert(0, avg_txMb)
@@ -328,6 +340,7 @@ def extract_sar_datas():
         df = pd.DataFrame(bw_datas[interface])
         set_global(f'{interface}_bw_data_df', df)
 
+
 def create_folder(folder_name):
     current_directory = os.getcwd()
     new_folder_path = os.path.join(current_directory, folder_name)
@@ -364,7 +377,7 @@ def save_top_data():
         mem_df = pd.DataFrame(mem_data)  # 直接使用字典
         set_global('cpu_df', cpu_df)
         set_global('mem_df', mem_df)
-        
+
         # 把CPU和MEM数据写入工作表
         cpu_df.to_excel(writer, sheet_name='CPU', index=True, index_label='NO.')
         mem_df.to_excel(writer, sheet_name='MEM', index=True, index_label='NO.')
@@ -487,7 +500,7 @@ def figure_chart(chart_title, data_frame_key, columns=None, is_grid=False, xlabe
 
     # 从全局变量获取 DataFrame
     data_frame = get_global(data_frame_key)
-    
+
     if data_frame is None:
         logger.error(f'未找到数据框: {data_frame_key}')
         return
@@ -538,7 +551,7 @@ def figure_chart(chart_title, data_frame_key, columns=None, is_grid=False, xlabe
 def figure_top_chart():
     logger.info('绘制top数据图')
     figure_chart('Server CPU Usage Over Time', 'cpu_df', columns=['used'], is_grid=True)
-    figure_chart('Server MEM Usage Over Time', 'mem_df', columns=['used rate'], is_grid=True)
+    figure_chart('Server MEM Usage Over Time', 'mem_df', columns=['real_used_rate'], is_grid=True)
     if pid_list or command_list:
         figure_chart('Process CPU Usage Over Time', 'summary_cpu_df', is_grid=True)
         figure_chart('Process MEM Usage Over Time', 'summary_mem_df', is_grid=True)
@@ -552,7 +565,8 @@ def figure_sar_chart():
 def figure_sar_chart_all():
     logger.info('绘制sarAll数据图')
     for interface in interfaces:
-        figure_chart(f'{interface} Bandwidth Over Time', f'{interface}_bw_data_df', columns=['rxMb/s', 'txMb/s'], ylabel='BW(Mb/s)')
+        figure_chart(f'{interface} Bandwidth Over Time', f'{interface}_bw_data_df', columns=['rxMb/s', 'txMb/s'],
+                     ylabel='BW(Mb/s)')
 
 
 def process_top_file(pid_list=None, command_list=None):
@@ -595,7 +609,7 @@ def calculate_average(data, startIndex=None, endIndex=None):
         # 计算中间60%的数据
         total_length = len(data)
         start_index = int(total_length * 0.2)  # 20%开始
-        end_index = int(total_length * 0.8)    # 80%结束
+        end_index = int(total_length * 0.8)  # 80%结束
         selected_data = data[start_index:end_index]
 
     return round(sum(selected_data) / len(selected_data), 2) if selected_data else 0
@@ -607,7 +621,7 @@ if __name__ == '__main__':
     # top文件中待处理的Process进程信息
     # 根据PID过滤
     pid_list = [
-        7260,7061,7118
+        4801, 4114, 4380, 4895, 4631, 4833
     ]
     # 根据Comand过滤，此时pid_list为None或[]
     command_list = ['RLS-MpTas+']
@@ -618,7 +632,7 @@ if __name__ == '__main__':
 
     # 待处理的sar文件
     sar_file_path = r'sar.txt'
-    interfaces = ['lo']
+    interfaces = ['bond0']
 
     # 新建文件夹保存处理后的数据
     current_time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -628,4 +642,4 @@ if __name__ == '__main__':
     process_top_file(pid_list, command_list=command_list)
     # 处理sar文件
     # process_sar_file()           # 按照网卡过滤存储的sar数据用该方法处理，如'sar -n DEV 1 | grep 'bond0' >> sar.txt &'
-    process_sar_file_all()       # 全量sar数据用该方法处理，如'sar -n DEV 1 >> sarAll.txt &'
+    process_sar_file_all()  # 全量sar数据用该方法处理，如'sar -n DEV 1 >> sarAll.txt &'
