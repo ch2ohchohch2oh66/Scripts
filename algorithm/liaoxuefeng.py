@@ -32,6 +32,8 @@
 # [1, 8, 28, 56, 70, 56, 28, 8, 1]
 # [1, 9, 36, 84, 126, 126, 84, 36, 9, 1]
 """
+
+
 def traigles(num):
     n, l1, l2 = 1, [], []
     while n <= num:
@@ -47,8 +49,10 @@ def traigles(num):
                     l2.append(l1[i - 1] + l1[i])
             l1 = l2
         n += 1
-        print(l2)
+        # print(l2)
+        yield l2
+
+
 if __name__ == '__main__':
-    traigles(10)
-
-
+    for i in traigles(10):
+        print(i)
