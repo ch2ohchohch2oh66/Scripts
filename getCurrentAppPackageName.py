@@ -8,7 +8,8 @@ def get_current_app_package_name():
     adb_command = [
         'powershell.exe',
         '-Command',
-        'adb shell dumpsys activity | Select-String -Pattern \'mCurrentFocus|mFocusedApp\''
+        'adb shell dumpsys activity activities | Select-String -Pattern \'mCurrentFocus|mFocusedApp|mResumedActivity\'',
+        # 'adb shell dumpsys activity activities | Select-String -Pattern \'mResumedActivity\''
     ]
     try:
         # 尝试执行adb命令并获取输出
@@ -18,18 +19,13 @@ def get_current_app_package_name():
         print(output)  # 打印完整输出以便调试
 
         for line in output.split('\n'):
-            # 注意：用于过滤的关键字可能会因Android版本而异，如果不起作用，请尝试其他关键字如 'mFocusedApp'
-            if "mCurrentFocus" in line:
-                pattern = r'([\w.]+)/([\w.]+)'
-                match = re.search(pattern, line)
-                if match:
-                    return match.group(1),match.group(2)
-
-            elif "mFocusedApp" in line:
-                pattern = r'([\w.]+)/([\w.]+)'
-                match = re.search(pattern, line)
-                if match:
-                    return match.group(1), match.group(2)
+            patterns = ["mCurrentFocus", "mFocusedApp", "mResumedActivity"]
+            for pattern_key in patterns:
+                if pattern_key in line:
+                    pattern = r'([\w.]+)/([\w.]+)'
+                    match = re.search(pattern, line)
+                    if match:
+                        return match.group(1), match.group(2)
 
         return None
 
@@ -68,10 +64,10 @@ if __name__ == "__main__":
     print(f"Current app package name: {appPackage}")
     print(f"Current app activity name: {appActivity}")
     # 如果成功获取到包名且包名不为None，则尝试卸载该应用
-    # if appPackage is not None:
-    #     uninstall_app(appPackage)
-    # else:
-    #     print("Failed to get the current app package name.")
+    if appPackage is not None:
+        uninstall_app(appPackage)
+    else:
+        print("Failed to get the current app package name.")
 
     # 直接在win11 PowerShell中执行如下命令亦可
-    # adb shell dumpsys activity | Select - String - Pattern 'mCurrentFocus|mFocusedApp'
+    # adb shell dumpsys activity | Select-String -Pattern 'mCurrentFocus|mFocusedApp'
