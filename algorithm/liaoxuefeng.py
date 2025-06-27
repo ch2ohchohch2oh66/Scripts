@@ -34,7 +34,7 @@
 """
 
 
-def traigles(num):
+def triangles(num):
     n, l1, l2 = 1, [], []
     while n <= num:
         l2 = []
@@ -54,5 +54,5 @@ def traigles(num):
 
 
 if __name__ == '__main__':
-    for i in traigles(10):
+    for i in triangles(10):
         print(i)
